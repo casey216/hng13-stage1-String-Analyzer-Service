@@ -1,10 +1,9 @@
-# 🧠 String Analyzer Service --- Stage 1 Backend Task
+# 🧠 String Analyzer Service
 
 ## 🚀 Overview
 
 This project implements a **RESTful API** service that analyzes strings
-and stores their computed properties.\
-It is built as part of the **Backend Wizards --- Stage 1 Task**.
+and stores their computed properties.
 
 ------------------------------------------------------------------------
 
@@ -178,13 +177,6 @@ API will be available at:\
 
 ------------------------------------------------------------------------
 
-## 🌍 Deployment
-
-You can host the API on: - Railway.app - Render (❌ forbidden this
-cohort) - Heroku - AWS - PXXL App or similar
-
-------------------------------------------------------------------------
-
 ## 🧪 Testing
 
 Use **Postman**, **cURL**, or **HTTPie** to test endpoints.
@@ -197,32 +189,17 @@ curl -X POST http://localhost:8000/strings -H "Content-Type: application/json" -
 
 ------------------------------------------------------------------------
 
-## 🧾 Submission Instructions
-
-1.  Verify your server works.
-2.  Go to your **private Slack channel**.
-3.  Run the command `/stage-one-backend`.
-4.  Submit:
-    -   ✅ API Base URL
-    -   ✅ GitHub Repo Link
-    -   ✅ Full Name
-    -   ✅ Email Address
-
-**Deadline:** ⏰ Wednesday, 22 Oct 2025 \| 11:59 PM GMT+1
-
-------------------------------------------------------------------------
 
 ## 🧑‍💻 Stack
 
 -   **Language:** Python 🐍
 -   **Framework:** FastAPI ⚡
--   **Database:** SQLite (or any simple persistent store)
--   **Hosting:** Railway.app / AWS / Heroku
+-   **Database:** SQLite
+-   **Hosting:** Railway.app
 
 ------------------------------------------------------------------------
 
 ## ✨ Author
 
-**Full Name:** Casey Nzewi\
+**Full Name:** Kenechi Nzewi\
 **Email:** caseynzewi@example.com\
-**Cohort:** HNG 13 Backend Wizards
