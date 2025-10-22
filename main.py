@@ -14,6 +14,15 @@ engine = create_engine(DATABASE_URL, echo=False, connect_args={"check_same_threa
 
 app = FastAPI(title="String Analyzer Service - Stage 1")
 
+# Enable CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # create tables
 def init_db():
     SQLModel.metadata.create_all(engine)
@@ -222,3 +231,9 @@ def delete_string(string_value: str = Path(...)):
         session.commit()
     return JSONResponse(status_code=204, content=None)
 
+import os
+import uvicorn
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)
