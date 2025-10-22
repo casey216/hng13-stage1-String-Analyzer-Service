@@ -1,6 +1,7 @@
 # main.py
 from fastapi import FastAPI, HTTPException, Query, Path, Body
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from sqlmodel import SQLModel, Session, create_engine, select
 from typing import Optional, List, Dict, Any
 from models import StringItem, analyze_string, sha256_hex
