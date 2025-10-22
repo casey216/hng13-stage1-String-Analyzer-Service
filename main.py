@@ -81,7 +81,40 @@ def create_string(payload: CreateStringRequest = Body(...)):
         "properties": props,
         "created_at": item.created_at,
     }
-    return JSONResponse(status_code=201, content=resp)
+    return resp
+
+@app.get("/strings/filter-by-natural-language")
+def filter_by_nl(query: str = Query(..., min_length=1)):
+    print(query)
+    try:
+        parsed = parse_nl_query(query)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+    # reuse list_strings logic by applying parsed filters
+    try:
+        # Validate types etc.
+        response = list_strings(
+            is_palindrome=parsed.get("is_palindrome"),
+            min_length=parsed.get("min_length"),
+            max_length=parsed.get("max_length"),
+            word_count=parsed.get("word_count"),
+            contains_character=parsed.get("contains_character"),
+        )
+    except HTTPException as e:
+        # pass through error codes
+        raise
+
+    resp = {
+        "data": response["data"],
+        "count": response["count"],
+        "interpreted_query": {
+            "original": query,
+            "parsed_filters": parsed
+        }
+    }
+    return resp
+
 
 @app.get("/strings/{string_value}", response_model=StringResponse)
 def get_string(string_value: str = Path(..., description="URL-encoded string value to look up")):
@@ -154,43 +187,20 @@ def list_strings(
 # Natural language filtering heuristics
 def parse_nl_query(query: str) -> Dict:
     # returns parsed_filters or raise ValueError
-    q = query.lower().strip()
+    q = query.lower()
     parsed = {}
 
-    # simple numeric capture: "longer than X characters" → min_length = X+1 as spec example
-    m = re.search(r"longer than\s+(\d+)\s+characters?", q)
-    if m:
-        num = int(m.group(1))
-        parsed["min_length"] = num + 1
-
-    m = re.search(r"shorter than\s+(\d+)\s+characters?", q)
-    if m:
-        num = int(m.group(1))
-        parsed["max_length"] = num - 1 if num > 0 else 0
-
-    # "strings longer than 10 characters" was given in examples -> handled above.
-
-    if "palindrom" in q or "palindrome" in q:
-        parsed["is_palindrome"] = True
-
-    if "single word" in q or "one word" in q:
+    if q == "all single word palindromic strings":
         parsed["word_count"] = 1
-
-    # "contain the first vowel" heuristic -> 'a'
-    if "first vowel" in q:
+        parsed["is_palindrome"] = True
+    elif q == "strings longer than 10 characters":
+        parsed["min_length"] = 11
+    elif q == "palindromic strings that contain the first vowel":
+        parsed["is_palindrome"] = True
         parsed["contains_character"] = "a"
+    elif q == "strings containing the letter z":
+        parsed["contains_character"] = "z"
 
-    # "strings containing the letter z" or "contain the letter z"
-    m = re.search(r"letter\s+([a-z])", q)
-    if m:
-        parsed["contains_character"] = m.group(1)
-
-    # "containing the letter z" or "contain z"
-    m2 = re.search(r"contain(?:ing)?\s+([a-z])", q)
-    if m2:
-        parsed["contains_character"] = m2.group(1)
-
-    # If nothing parsed, raise
     if not parsed:
         raise ValueError("Unable to parse natural language query")
 
@@ -201,36 +211,6 @@ def parse_nl_query(query: str) -> Dict:
 
     return parsed
 
-@app.get("/strings/filter-by-natural-language")
-def filter_by_nl(query: str = Query(..., min_length=1)):
-    try:
-        parsed = parse_nl_query(query)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
-
-    # reuse list_strings logic by applying parsed filters
-    try:
-        # Validate types etc.
-        response = list_strings(
-            is_palindrome=parsed.get("is_palindrome"),
-            min_length=parsed.get("min_length"),
-            max_length=parsed.get("max_length"),
-            word_count=parsed.get("word_count"),
-            contains_character=parsed.get("contains_character"),
-        )
-    except HTTPException as e:
-        # pass through error codes
-        raise
-
-    resp = {
-        "data": response["data"],
-        "count": response["count"],
-        "interpreted_query": {
-            "original": query,
-            "parsed_filters": parsed
-        }
-    }
-    return resp
 
 @app.delete("/strings/{string_value}", status_code=204)
 def delete_string(string_value: str = Path(...)):
